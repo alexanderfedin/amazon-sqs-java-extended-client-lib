@@ -4,7 +4,7 @@ import java.util.function.Consumer;
 
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
 import software.amazon.awssdk.core.exception.SdkClientException;
-import software.amazon.awssdk.regions.ServiceMetadata;
+import software.amazon.awssdk.core.exception.SdkException;
 import software.amazon.awssdk.services.sqs.SqsClient;
 import software.amazon.awssdk.services.sqs.model.AddPermissionRequest;
 import software.amazon.awssdk.services.sqs.model.AddPermissionResponse;
@@ -65,15 +65,16 @@ import software.amazon.awssdk.services.sqs.model.UntagQueueResponse;
 
 /**
  * @author Alexander
- *
+ * Implements SqsClient interface as an abstract delegation of all methods to the enclosed instance.
+ * Serves as a base class for the decorators, i.e. SqsExtendedClient.
  */
 public abstract class SqsExtendedClientBase implements SqsClient {
 
-	protected final SqsClient sqsClient;
+	protected final SqsClient impl;
 
 	protected SqsExtendedClientBase(SqsClient sqsClient) {
-		if (sqsClient == null) throw new IllegalArgumentException("sqsClient");
-		this.sqsClient = sqsClient;
+		if (sqsClient == null) throw new IllegalArgumentException("impl");
+		this.impl = sqsClient;
 	}
 	/* (non-Javadoc)
 	 * @see software.amazon.awssdk.core.SdkClient#serviceName()
@@ -81,7 +82,7 @@ public abstract class SqsExtendedClientBase implements SqsClient {
 	@Override
 	public String serviceName() {
 		// TODO Auto-generated method stub
-		return sqsClient.serviceName();
+		return impl.serviceName();
 	}
 
 	/* (non-Javadoc)
@@ -89,7 +90,7 @@ public abstract class SqsExtendedClientBase implements SqsClient {
 	 */
 	@Override
 	public void close() {
-		sqsClient.close();
+		impl.close();
 	}
 
     /**
@@ -157,7 +158,7 @@ public abstract class SqsExtendedClientBase implements SqsClient {
     @Override
     public AddPermissionResponse addPermission(AddPermissionRequest addPermissionRequest) throws OverLimitException,
             AwsServiceException, SdkClientException, SqsException {
-        return sqsClient.addPermission(addPermissionRequest);
+        return impl.addPermission(addPermissionRequest);
     }
 
     /**
@@ -230,7 +231,7 @@ public abstract class SqsExtendedClientBase implements SqsClient {
     @Override
     public AddPermissionResponse addPermission(Consumer<AddPermissionRequest.Builder> addPermissionRequest)
             throws OverLimitException, AwsServiceException, SdkClientException, SqsException {
-        return sqsClient.addPermission(addPermissionRequest);
+        return impl.addPermission(addPermissionRequest);
     }
 
     /**
@@ -295,7 +296,7 @@ public abstract class SqsExtendedClientBase implements SqsClient {
     public ChangeMessageVisibilityResponse changeMessageVisibility(ChangeMessageVisibilityRequest changeMessageVisibilityRequest)
             throws MessageNotInflightException, ReceiptHandleIsInvalidException, AwsServiceException, SdkClientException,
             SqsException {
-        return sqsClient.changeMessageVisibility(changeMessageVisibilityRequest);
+        return impl.changeMessageVisibility(changeMessageVisibilityRequest);
     }
 
     /**
@@ -366,7 +367,7 @@ public abstract class SqsExtendedClientBase implements SqsClient {
     public ChangeMessageVisibilityResponse changeMessageVisibility(
             Consumer<ChangeMessageVisibilityRequest.Builder> changeMessageVisibilityRequest) throws MessageNotInflightException,
             ReceiptHandleIsInvalidException, AwsServiceException, SdkClientException, SqsException {
-        return sqsClient.changeMessageVisibility(changeMessageVisibilityRequest);
+        return impl.changeMessageVisibility(changeMessageVisibilityRequest);
     }
 
     /**
@@ -419,7 +420,7 @@ public abstract class SqsExtendedClientBase implements SqsClient {
             ChangeMessageVisibilityBatchRequest changeMessageVisibilityBatchRequest)
             throws TooManyEntriesInBatchRequestException, EmptyBatchRequestException, BatchEntryIdsNotDistinctException,
             InvalidBatchEntryIdException, AwsServiceException, SdkClientException, SqsException {
-        return sqsClient.changeMessageVisibilityBatch(changeMessageVisibilityBatchRequest);
+        return impl.changeMessageVisibilityBatch(changeMessageVisibilityBatchRequest);
     }
 
     /**
@@ -479,7 +480,7 @@ public abstract class SqsExtendedClientBase implements SqsClient {
             Consumer<ChangeMessageVisibilityBatchRequest.Builder> changeMessageVisibilityBatchRequest)
             throws TooManyEntriesInBatchRequestException, EmptyBatchRequestException, BatchEntryIdsNotDistinctException,
             InvalidBatchEntryIdException, AwsServiceException, SdkClientException, SqsException {
-        return sqsClient.changeMessageVisibilityBatch(changeMessageVisibilityBatchRequest);
+        return impl.changeMessageVisibilityBatch(changeMessageVisibilityBatchRequest);
     }
 
     /**
@@ -575,7 +576,7 @@ public abstract class SqsExtendedClientBase implements SqsClient {
     @Override
     public CreateQueueResponse createQueue(CreateQueueRequest createQueueRequest) throws QueueDeletedRecentlyException,
             QueueNameExistsException, AwsServiceException, SdkClientException, SqsException {
-        return sqsClient.createQueue(createQueueRequest);
+        return impl.createQueue(createQueueRequest);
     }
 
     /**
@@ -676,7 +677,7 @@ public abstract class SqsExtendedClientBase implements SqsClient {
     @Override
     public CreateQueueResponse createQueue(Consumer<CreateQueueRequest.Builder> createQueueRequest)
             throws QueueDeletedRecentlyException, QueueNameExistsException, AwsServiceException, SdkClientException, SqsException {
-        return sqsClient.createQueue(createQueueRequest);
+        return impl.createQueue(createQueueRequest);
     }
 
     /**
@@ -724,7 +725,7 @@ public abstract class SqsExtendedClientBase implements SqsClient {
     @Override
     public DeleteMessageResponse deleteMessage(DeleteMessageRequest deleteMessageRequest) throws InvalidIdFormatException,
             ReceiptHandleIsInvalidException, AwsServiceException, SdkClientException, SqsException {
-        return sqsClient.deleteMessage(deleteMessageRequest);
+        return impl.deleteMessage(deleteMessageRequest);
     }
 
     /**
@@ -778,7 +779,7 @@ public abstract class SqsExtendedClientBase implements SqsClient {
     public DeleteMessageResponse deleteMessage(Consumer<DeleteMessageRequest.Builder> deleteMessageRequest)
             throws InvalidIdFormatException, ReceiptHandleIsInvalidException, AwsServiceException, SdkClientException,
             SqsException {
-        return sqsClient.deleteMessage(deleteMessageRequest);
+        return impl.deleteMessage(deleteMessageRequest);
     }
 
     /**
@@ -829,7 +830,7 @@ public abstract class SqsExtendedClientBase implements SqsClient {
     public DeleteMessageBatchResponse deleteMessageBatch(DeleteMessageBatchRequest deleteMessageBatchRequest)
             throws TooManyEntriesInBatchRequestException, EmptyBatchRequestException, BatchEntryIdsNotDistinctException,
             InvalidBatchEntryIdException, AwsServiceException, SdkClientException, SqsException {
-        return sqsClient.deleteMessageBatch(deleteMessageBatchRequest);
+        return impl.deleteMessageBatch(deleteMessageBatchRequest);
     }
 
     /**
@@ -887,7 +888,7 @@ public abstract class SqsExtendedClientBase implements SqsClient {
     public DeleteMessageBatchResponse deleteMessageBatch(Consumer<DeleteMessageBatchRequest.Builder> deleteMessageBatchRequest)
             throws TooManyEntriesInBatchRequestException, EmptyBatchRequestException, BatchEntryIdsNotDistinctException,
             InvalidBatchEntryIdException, AwsServiceException, SdkClientException, SqsException {
-        return sqsClient.deleteMessageBatch(deleteMessageBatchRequest);
+        return impl.deleteMessageBatch(deleteMessageBatchRequest);
     }
 
     /**
@@ -934,7 +935,7 @@ public abstract class SqsExtendedClientBase implements SqsClient {
     @Override
     public DeleteQueueResponse deleteQueue(DeleteQueueRequest deleteQueueRequest) throws AwsServiceException,
             SdkClientException, SqsException {
-        return sqsClient.deleteQueue(deleteQueueRequest);
+        return impl.deleteQueue(deleteQueueRequest);
     }
 
     /**
@@ -986,7 +987,7 @@ public abstract class SqsExtendedClientBase implements SqsClient {
     @Override
     public DeleteQueueResponse deleteQueue(Consumer<DeleteQueueRequest.Builder> deleteQueueRequest) throws AwsServiceException,
             SdkClientException, SqsException {
-        return sqsClient.deleteQueue(deleteQueueRequest);
+        return impl.deleteQueue(deleteQueueRequest);
     }
 
     /**
@@ -1029,7 +1030,7 @@ public abstract class SqsExtendedClientBase implements SqsClient {
     @Override
     public GetQueueAttributesResponse getQueueAttributes(GetQueueAttributesRequest getQueueAttributesRequest)
             throws InvalidAttributeNameException, AwsServiceException, SdkClientException, SqsException {
-        return sqsClient.getQueueAttributes(getQueueAttributesRequest);
+        return impl.getQueueAttributes(getQueueAttributesRequest);
     }
 
     /**
@@ -1079,7 +1080,7 @@ public abstract class SqsExtendedClientBase implements SqsClient {
     @Override
     public GetQueueAttributesResponse getQueueAttributes(Consumer<GetQueueAttributesRequest.Builder> getQueueAttributesRequest)
             throws InvalidAttributeNameException, AwsServiceException, SdkClientException, SqsException {
-        return sqsClient.getQueueAttributes(getQueueAttributesRequest);
+        return impl.getQueueAttributes(getQueueAttributesRequest);
     }
 
     /**
@@ -1113,7 +1114,7 @@ public abstract class SqsExtendedClientBase implements SqsClient {
     @Override
     public GetQueueUrlResponse getQueueUrl(GetQueueUrlRequest getQueueUrlRequest) throws QueueDoesNotExistException,
             AwsServiceException, SdkClientException, SqsException {
-        return sqsClient.getQueueUrl(getQueueUrlRequest);
+        return impl.getQueueUrl(getQueueUrlRequest);
     }
 
     /**
@@ -1153,7 +1154,7 @@ public abstract class SqsExtendedClientBase implements SqsClient {
     @Override
     public GetQueueUrlResponse getQueueUrl(Consumer<GetQueueUrlRequest.Builder> getQueueUrlRequest)
             throws QueueDoesNotExistException, AwsServiceException, SdkClientException, SqsException {
-        return sqsClient.getQueueUrl(getQueueUrlRequest);
+        return impl.getQueueUrl(getQueueUrlRequest);
     }
 
     /**
@@ -1186,7 +1187,7 @@ public abstract class SqsExtendedClientBase implements SqsClient {
     public ListDeadLetterSourceQueuesResponse listDeadLetterSourceQueues(
             ListDeadLetterSourceQueuesRequest listDeadLetterSourceQueuesRequest) throws QueueDoesNotExistException,
             AwsServiceException, SdkClientException, SqsException {
-        return sqsClient.listDeadLetterSourceQueues(listDeadLetterSourceQueuesRequest);
+        return impl.listDeadLetterSourceQueues(listDeadLetterSourceQueuesRequest);
     }
 
     /**
@@ -1226,7 +1227,7 @@ public abstract class SqsExtendedClientBase implements SqsClient {
     public ListDeadLetterSourceQueuesResponse listDeadLetterSourceQueues(
             Consumer<ListDeadLetterSourceQueuesRequest.Builder> listDeadLetterSourceQueuesRequest)
             throws QueueDoesNotExistException, AwsServiceException, SdkClientException, SqsException {
-        return sqsClient.listDeadLetterSourceQueues(listDeadLetterSourceQueuesRequest);
+        return impl.listDeadLetterSourceQueues(listDeadLetterSourceQueuesRequest);
     }
 
     /**
@@ -1297,7 +1298,7 @@ public abstract class SqsExtendedClientBase implements SqsClient {
     @Override
     public ListQueueTagsResponse listQueueTags(ListQueueTagsRequest listQueueTagsRequest) throws AwsServiceException,
             SdkClientException, SqsException {
-        return sqsClient.listQueueTags(listQueueTagsRequest);
+        return impl.listQueueTags(listQueueTagsRequest);
     }
 
     /**
@@ -1373,7 +1374,7 @@ public abstract class SqsExtendedClientBase implements SqsClient {
     @Override
     public ListQueueTagsResponse listQueueTags(Consumer<ListQueueTagsRequest.Builder> listQueueTagsRequest)
             throws AwsServiceException, SdkClientException, SqsException {
-        return sqsClient.listQueueTags(listQueueTagsRequest);
+        return impl.listQueueTags(listQueueTagsRequest);
     }
 
     /**
@@ -1406,7 +1407,7 @@ public abstract class SqsExtendedClientBase implements SqsClient {
      */
     @Override
     public ListQueuesResponse listQueues() throws AwsServiceException, SdkClientException, SqsException {
-        return sqsClient.listQueues();
+        return impl.listQueues();
     }
 
     /**
@@ -1440,7 +1441,7 @@ public abstract class SqsExtendedClientBase implements SqsClient {
     @Override
     public ListQueuesResponse listQueues(ListQueuesRequest listQueuesRequest) throws AwsServiceException, SdkClientException,
             SqsException {
-        return sqsClient.listQueues(listQueuesRequest);
+        return impl.listQueues(listQueuesRequest);
     }
 
     /**
@@ -1479,7 +1480,7 @@ public abstract class SqsExtendedClientBase implements SqsClient {
     @Override
     public ListQueuesResponse listQueues(Consumer<ListQueuesRequest.Builder> listQueuesRequest) throws AwsServiceException,
             SdkClientException, SqsException {
-        return sqsClient.listQueues(listQueuesRequest);
+        return impl.listQueues(listQueuesRequest);
     }
 
     /**
@@ -1525,7 +1526,7 @@ public abstract class SqsExtendedClientBase implements SqsClient {
     @Override
     public PurgeQueueResponse purgeQueue(PurgeQueueRequest purgeQueueRequest) throws QueueDoesNotExistException,
             PurgeQueueInProgressException, AwsServiceException, SdkClientException, SqsException {
-        return sqsClient.purgeQueue(purgeQueueRequest);
+        return impl.purgeQueue(purgeQueueRequest);
     }
 
     /**
@@ -1578,7 +1579,7 @@ public abstract class SqsExtendedClientBase implements SqsClient {
     public PurgeQueueResponse purgeQueue(Consumer<PurgeQueueRequest.Builder> purgeQueueRequest)
             throws QueueDoesNotExistException, PurgeQueueInProgressException, AwsServiceException, SdkClientException,
             SqsException {
-        return sqsClient.purgeQueue(purgeQueueRequest);
+        return impl.purgeQueue(purgeQueueRequest);
     }
 
     /**
@@ -1676,7 +1677,7 @@ public abstract class SqsExtendedClientBase implements SqsClient {
     @Override
     public ReceiveMessageResponse receiveMessage(ReceiveMessageRequest receiveMessageRequest) throws OverLimitException,
             AwsServiceException, SdkClientException, SqsException {
-        return sqsClient.receiveMessage(receiveMessageRequest);
+        return impl.receiveMessage(receiveMessageRequest);
     }
 
     /**
@@ -1779,7 +1780,7 @@ public abstract class SqsExtendedClientBase implements SqsClient {
     @Override
     public ReceiveMessageResponse receiveMessage(Consumer<ReceiveMessageRequest.Builder> receiveMessageRequest)
             throws OverLimitException, AwsServiceException, SdkClientException, SqsException {
-        return sqsClient.receiveMessage(receiveMessageRequest);
+        return impl.receiveMessage(receiveMessageRequest);
     }
 
     /**
@@ -1814,7 +1815,7 @@ public abstract class SqsExtendedClientBase implements SqsClient {
     @Override
     public RemovePermissionResponse removePermission(RemovePermissionRequest removePermissionRequest)
             throws AwsServiceException, SdkClientException, SqsException {
-        return sqsClient.removePermission(removePermissionRequest);
+        return impl.removePermission(removePermissionRequest);
     }
 
     /**
@@ -1854,7 +1855,7 @@ public abstract class SqsExtendedClientBase implements SqsClient {
     @Override
     public RemovePermissionResponse removePermission(Consumer<RemovePermissionRequest.Builder> removePermissionRequest)
             throws AwsServiceException, SdkClientException, SqsException {
-        return sqsClient.removePermission(removePermissionRequest);
+        return impl.removePermission(removePermissionRequest);
     }
 
     /**
@@ -1896,7 +1897,7 @@ public abstract class SqsExtendedClientBase implements SqsClient {
     public SendMessageResponse sendMessage(SendMessageRequest sendMessageRequest) throws InvalidMessageContentsException,
             software.amazon.awssdk.services.sqs.model.UnsupportedOperationException, AwsServiceException, SdkClientException,
             SqsException {
-        return sqsClient.sendMessage(sendMessageRequest);
+        return impl.sendMessage(sendMessageRequest);
     }
 
     /**
@@ -1943,7 +1944,7 @@ public abstract class SqsExtendedClientBase implements SqsClient {
     public SendMessageResponse sendMessage(Consumer<SendMessageRequest.Builder> sendMessageRequest)
             throws InvalidMessageContentsException, software.amazon.awssdk.services.sqs.model.UnsupportedOperationException,
             AwsServiceException, SdkClientException, SqsException {
-        return sqsClient.sendMessage(sendMessageRequest);
+        return impl.sendMessage(sendMessageRequest);
     }
 
     /**
@@ -2019,7 +2020,7 @@ public abstract class SqsExtendedClientBase implements SqsClient {
             BatchRequestTooLongException, InvalidBatchEntryIdException,
             software.amazon.awssdk.services.sqs.model.UnsupportedOperationException, AwsServiceException, SdkClientException,
             SqsException {
-        return sqsClient.sendMessageBatch(sendMessageBatchRequest);
+        return impl.sendMessageBatch(sendMessageBatchRequest);
     }
 
     /**
@@ -2101,7 +2102,7 @@ public abstract class SqsExtendedClientBase implements SqsClient {
             BatchRequestTooLongException, InvalidBatchEntryIdException,
             software.amazon.awssdk.services.sqs.model.UnsupportedOperationException, AwsServiceException, SdkClientException,
             SqsException {
-        return sqsClient.sendMessageBatch(sendMessageBatchRequest);
+        return impl.sendMessageBatch(sendMessageBatchRequest);
     }
 
     /**
@@ -2141,7 +2142,7 @@ public abstract class SqsExtendedClientBase implements SqsClient {
     @Override
     public SetQueueAttributesResponse setQueueAttributes(SetQueueAttributesRequest setQueueAttributesRequest)
             throws InvalidAttributeNameException, AwsServiceException, SdkClientException, SqsException {
-        return sqsClient.setQueueAttributes(setQueueAttributesRequest);
+        return impl.setQueueAttributes(setQueueAttributesRequest);
     }
 
     /**
@@ -2187,7 +2188,7 @@ public abstract class SqsExtendedClientBase implements SqsClient {
     @Override
     public SetQueueAttributesResponse setQueueAttributes(Consumer<SetQueueAttributesRequest.Builder> setQueueAttributesRequest)
             throws InvalidAttributeNameException, AwsServiceException, SdkClientException, SqsException {
-        return sqsClient.setQueueAttributes(setQueueAttributesRequest);
+        return impl.setQueueAttributes(setQueueAttributesRequest);
     }
 
     /**
@@ -2258,7 +2259,7 @@ public abstract class SqsExtendedClientBase implements SqsClient {
     @Override
     public TagQueueResponse tagQueue(TagQueueRequest tagQueueRequest) throws AwsServiceException, SdkClientException,
             SqsException {
-        return sqsClient.tagQueue(tagQueueRequest);
+        return impl.tagQueue(tagQueueRequest);
     }
 
     /**
@@ -2334,7 +2335,7 @@ public abstract class SqsExtendedClientBase implements SqsClient {
     @Override
     public TagQueueResponse tagQueue(Consumer<TagQueueRequest.Builder> tagQueueRequest) throws AwsServiceException,
             SdkClientException, SqsException {
-        return sqsClient.tagQueue(tagQueueRequest);
+        return impl.tagQueue(tagQueueRequest);
     }
 
     /**
@@ -2405,7 +2406,7 @@ public abstract class SqsExtendedClientBase implements SqsClient {
     @Override
     public UntagQueueResponse untagQueue(UntagQueueRequest untagQueueRequest) throws AwsServiceException, SdkClientException,
             SqsException {
-        return sqsClient.untagQueue(untagQueueRequest);
+        return impl.untagQueue(untagQueueRequest);
     }
 
     /**
@@ -2481,6 +2482,6 @@ public abstract class SqsExtendedClientBase implements SqsClient {
     @Override
     public UntagQueueResponse untagQueue(Consumer<UntagQueueRequest.Builder> untagQueueRequest) throws AwsServiceException,
             SdkClientException, SqsException {
-        return sqsClient.untagQueue(untagQueueRequest);
+        return impl.untagQueue(untagQueueRequest);
     }
 }
