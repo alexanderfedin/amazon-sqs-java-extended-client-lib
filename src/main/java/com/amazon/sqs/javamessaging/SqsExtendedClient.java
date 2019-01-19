@@ -21,6 +21,7 @@ import org.apache.commons.logging.LogFactory;
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
 import software.amazon.awssdk.core.exception.SdkClientException;
 import software.amazon.awssdk.core.exception.SdkServiceException;
+import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.sqs.SqsClient;
 import software.amazon.awssdk.services.sqs.model.DeleteMessageBatchRequest;
@@ -750,26 +751,31 @@ public class SqsExtendedClient extends SqsExtendedClientBase implements SqsClien
 
 	private SendMessageRequest storeMessageInS3(SendMessageRequest sendMessageRequest) {
 
-		checkMessageAttributes(sendMessageRequest.getMessageAttributes());
+		checkMessageAttributes(sendMessageRequest.messageAttributes());
 
 		String s3Key = UUID.randomUUID().toString();
 
 		// Read the content of the message from message body
-		String messageContentStr = sendMessageRequest.getMessageBody();
+		String messageContentStr = sendMessageRequest.messageBody();
 
 		Long messageContentSize = getStringSizeInBytes(messageContentStr);
 
 		// Add a new message attribute as a flag
-		MessageAttributeValue messageAttributeValue = new MessageAttributeValue();
-		messageAttributeValue.setDataType("Number");
-		messageAttributeValue.setStringValue(messageContentSize.toString());
-		sendMessageRequest.addMessageAttributesEntry(SQSExtendedClientConstants.RESERVED_ATTRIBUTE_NAME,
-				messageAttributeValue);
+		MessageAttributeValue messageAttributeValue = MessageAttributeValue
+			.builder()
+			.dataType("Number")
+			.stringValue(messageContentSize.toString())
+			.build();
+		sendMessageRequest
+			.messageAttributes()
+			.put(
+				SQSExtendedClientConstants.RESERVED_ATTRIBUTE_NAME,
+				messageAttributeValue
+			);
 
 		// Store the message content in S3.
 		storeTextInS3(s3Key, messageContentStr, messageContentSize);
-		LOG.info("S3 object created, Bucket name: " + clientConfiguration.getS3BucketName() + ", Object key: " + s3Key
-				+ ".");
+		LOG.info("S3 object created, Bucket name: " + clientConfiguration.getS3BucketName() + ", Object key: " + s3Key + ".");
 
 		// Convert S3 pointer (bucket name, key, etc) to JSON string
 		MessageS3Pointer s3Pointer = new MessageS3Pointer(clientConfiguration.getS3BucketName(), s3Key);
@@ -783,31 +789,39 @@ public class SqsExtendedClient extends SqsExtendedClientBase implements SqsClien
 	}
 
 	private String getJSONFromS3Pointer(MessageS3Pointer s3Pointer) {
-		String s3PointerStr = null;
 		try {
 			JsonDataConverter jsonDataConverter = new JsonDataConverter();
-			s3PointerStr = jsonDataConverter.serializeToJson(s3Pointer);
+			String s3PointerStr = jsonDataConverter.serializeToJson(s3Pointer);
+			return s3PointerStr;
 		} catch (Exception e) {
 			String errorMessage = "Failed to convert S3 object pointer to text. Message was not sent.";
 			LOG.error(errorMessage, e);
 			throw SdkClientException.create(errorMessage, e);
 		}
-		return s3PointerStr;
 	}
 
-	private void storeTextInS3(String s3Key, String messageContentStr, Long messageContentSize) {
-		InputStream messageContentStream = new ByteArrayInputStream(messageContentStr.getBytes(StandardCharsets.UTF_8));
-		ObjectMetadata messageContentStreamMetadata = new ObjectMetadata();
-		messageContentStreamMetadata.setContentLength(messageContentSize);
-		PutObjectRequest putObjectRequest = new PutObjectRequest(clientConfiguration.getS3BucketName(), s3Key,
-				messageContentStream, messageContentStreamMetadata);
+	private void storeTextInS3(
+		String s3Key, 
+		String messageContentStr, 
+		Long messageContentSize
+	) {
 		try {
-			clientConfiguration.getAmazonS3Client().putObject(putObjectRequest);
+			PutObjectRequest putObjectRequest = PutObjectRequest
+					.builder()
+					.contentLength(messageContentSize)
+					.bucket(clientConfiguration.getS3BucketName())
+					.key(s3Key)
+					.build();
+			RequestBody requestBody = RequestBody
+					.fromString(messageContentStr);
+			clientConfiguration
+					.getAmazonS3Client()
+					.putObject(putObjectRequest, requestBody);
 		}
 		catch (SdkServiceException e) {
 			String errorMessage = "Failed to store the message content in an S3 object. SQS message was not sent.";
 			LOG.error(errorMessage, e);
-			throw SdkServiceException.create(errorMessage, e);
+			throw SdkClientException.create(errorMessage, e);
 		}
 		catch (SdkClientException e) {
 			String errorMessage = "Failed to store the message content in an S3 object. SQS message was not sent.";
